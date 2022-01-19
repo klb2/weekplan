@@ -26,4 +26,9 @@ setup(
         ],
     packages=find_packages(),
     tests_require=['pytest', 'tox'],
+    entry_points={
+        'console_scripts': [
+            'weekplan = weekplan.__main__:main_cmd'
+        ],
+},
 )

@@ -1,3 +1,4 @@
+import os
 import os.path
 import dataclasses
 from datetime import date, datetime
@@ -25,11 +26,26 @@ def load_project_from_dict(d: dict) -> Project:
     p = Project(**d)
     return p
 
+def load_project_from_json(f: str) -> Project:
+    with open(f, 'r') as json_file:
+        project_dict = json.load(json_file)
+    p = load_project_from_dict(project_dict)
+    print(p)
+    return p
+
 def save_project(project: Project):
     _asdict = dataclasses.asdict(project)
     _filename = "{}.json".format(sanitize_name(project.name))
     target_file = os.path.join(BASE_DIR, _filename)
-    #with open(target_file, 'w') as out_file:
-    #    json.dump(_asdict, out_file, default=_json_serial_datetime,
-    #              indent=4)
+    with open(target_file, 'w') as out_file:
+        json.dump(_asdict, out_file, default=_json_serial_datetime,
+                  indent=4)
     return _asdict
+
+def load_projects() -> list[Project]:
+    projects = []
+    for _file in os.listdir(BASE_DIR):
+        if _file.endswith("json"):
+            p = load_project_from_json(os.path.join(BASE_DIR, _file))
+            projects.append(p)
+    return projects
