@@ -8,6 +8,14 @@ class Task:
     name: str
     dates: list[datetime] = dataclasses.field(default_factory=list)
 
+    def __post_init__(self):
+        for field in dataclasses.fields(self):
+            if field.type == datetime:
+                value = getattr(self, field.name)
+                if not isinstance(value, field.type) and not value is None:
+                    print(type(value))
+                    setattr(self, field.name, datetime.fromisoformat(value))
+
     def add_date(self, date: (datetime, str)):
         if isinstance(date, str):
             date = datetime.fromisoformat(date)
@@ -23,13 +31,13 @@ class Project:
     tasks: list[Task] = dataclasses.field(default_factory=list)
     key: int = 0
 
-    #def __post_init__(self):
-    #    for field in dataclasses.fields(self):
-    #        value = getattr(self, field.name)
-    #        if not isinstance(value, field.type):
-    #            raise ValueError(f'Expected {field.name} to be {field.type}, '
-    #                            f'got {repr(value)}')
-    #            # or setattr(self, field.name, field.type(value))
+    def __post_init__(self):
+        for field in dataclasses.fields(self):
+            if field.type == datetime:
+                value = getattr(self, field.name)
+                if not isinstance(value, field.type) and not value is None:
+                    print(type(value))
+                    setattr(self, field.name, datetime.fromisoformat(value))
 
     def add_task(self, task: Task):
         self.tasks.append(task)
