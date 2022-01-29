@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date as DATE
 import dataclasses
 from dataclasses import dataclass
 
@@ -6,19 +6,20 @@ from dataclasses import dataclass
 @dataclass
 class Task:
     name: str
-    dates: list[datetime] = dataclasses.field(default_factory=list)
+    dates: list[DATE] = dataclasses.field(default_factory=list)
+    completed: bool = False
 
     def __post_init__(self):
         _dates = []
         for _date in self.dates:
-            if not isinstance(_date, datetime) and not _date is None:
-                _date = datetime.fromisoformat(_date)
+            if not isinstance(_date, DATE) and not _date is None:
+                _date = DATE.fromisoformat(_date)
             _dates.append(_date)
         self.dates = _dates
 
-    def add_date(self, date: (datetime, str)):
+    def add_date(self, date: (DATE, str)):
         if isinstance(date, str):
-            date = datetime.fromisoformat(date)
+            date = DATE.fromisoformat(date)
         self.dates.append(date)
         self.dates = sorted(self.dates)
 
@@ -27,17 +28,17 @@ class Task:
 class Project:
     name: str
     description: str = ""
-    created: datetime = datetime.now()
-    completed: datetime = None
+    created: DATE = DATE.today()
+    completed: DATE = None
     tasks: list[Task] = dataclasses.field(default_factory=list)
     key: int = 0
 
     def __post_init__(self):
         for field in dataclasses.fields(self):
-            if field.type == datetime:
+            if field.type == DATE:
                 value = getattr(self, field.name)
                 if not isinstance(value, field.type) and not value is None:
-                    setattr(self, field.name, datetime.fromisoformat(value))
+                    setattr(self, field.name, DATE.fromisoformat(value))
         self.tasks = [Task(**_t) for _t in self.tasks]
 
     def add_task(self, task: Task):

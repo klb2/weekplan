@@ -30,7 +30,6 @@ def load_project_from_json(f: str) -> Project:
     with open(f, 'r') as json_file:
         project_dict = json.load(json_file)
     p = load_project_from_dict(project_dict)
-    print(p)
     return p
 
 def save_project(project: Project):
