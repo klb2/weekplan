@@ -1,4 +1,7 @@
+from datetime import date
+
 import click
+import columnar
 
 from . import Project, Task
 from . import io
@@ -46,8 +49,28 @@ def task():
 
 @task.command()
 def add():
+    click.echo("add task")
+
+
+@cli.group("week")
+def week():
     pass
 
+@week.command()
+def show():
+    today = date.today()
+    week = today.isocalendar().week
+    week = [date.fromisocalendar(today.year, week, i+1) for i in range(5)]
+    projects = io.load_projects()
+    table = []
+    for p in projects:
+        for _task in p.tasks:
+            #_days_in_week = sorted(set(_task.dates).intersection(week))
+            row = [_task.name if _day in _task.dates else "" for _day in week]
+            if not row == [""]*len(week):
+                table.append(row)
+    table = columnar.columnar(data=table, headers=[_d.strftime("%b %d") for _d in week])
+    click.echo(table)
 
 if __name__ == "__main__":
     cli()

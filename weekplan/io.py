@@ -4,10 +4,26 @@ import dataclasses
 from datetime import date, datetime
 import json
 import re
+import configparser
 
 from .base import Project
 
 BASE_DIR = os.path.expanduser("~/.weekplan")
+CONF_FILE = 'weekplan.ini'
+
+SECT_INI_PROJECTS = 'projects'
+
+def generate_ini_file() -> None:
+    config = configparser.ConfigParser()
+    config.read(os.path.join(BASE_DIR, CONF_FILE))
+    if not config.has_section(SECT_INI_PROJECTS):
+        config.add_section(SECT_INI_PROJECTS)
+    for _file in os.listdir(BASE_DIR):
+        if _file.endswith("json"):
+            p = load_project_from_json(os.path.join(BASE_DIR, _file))
+            config.set(SECT_INI_PROJECTS, p.name, _file)
+    with open(os.path.join(BASE_DIR, CONF_FILE), 'w') as _conf_file:
+        config.write(_conf_file)
 
 def _json_serial_datetime(obj):
     if isinstance(obj, (datetime, date)):
