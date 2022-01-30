@@ -42,14 +42,40 @@ def list(verbose):
 
 
 
+def _list_projects(projects):
+    for idx, _p in enumerate(projects):
+        click.echo(f"{idx:>2d}: {_p.name}")
+
+def _list_active_projects(projects):
+    for idx, _p in enumerate(projects):
+        if _p.completed is not None: continue
+        click.echo(f"{idx:>2d}: {_p.name}")
+
+def _list_tasks(tasks):
+    for idx, _t in enumerate(tasks):
+        click.echo(f"{idx:>2d}: {_t.name}")
+
+def _list_active_tasks(tasks, day):
+    for idx, _t in enumerate(tasks):
+        if (day in _t.dates) or (_t.completed): continue
+        click.echo(f"{idx:>2d}: {_t.name}")
+
+
 
 @cli.group("task")
 def task():
     pass
 
 @task.command()
-def add():
-    click.echo("add task")
+@click.argument("name", type=str)
+def add(name):
+    t = Task(name)
+    projects = io.load_projects()
+    _list_projects(projects)
+    _selected_idx = click.prompt("Project to add to", type=int)
+    _selected_project = projects[_selected_idx]
+    _selected_project.add_task(t)
+    io.save_project(_selected_project)
 
 
 @cli.group("week")
@@ -71,6 +97,30 @@ def show():
                 table.append(row)
     table = columnar.columnar(data=table, headers=[_d.strftime("%b %d") for _d in week])
     click.echo(table)
+
+@week.command()
+def plan():
+    today = date.today()
+    week = today.isocalendar().week
+    week = [date.fromisocalendar(today.year, week, i+1) for i in range(5)]
+    projects = io.load_projects()
+    for day in week:
+        while True:
+            click.echo(click.style(day.strftime("%A: %b %d"), bold=True))
+            #_list_projects(projects)
+            _list_active_projects(projects)
+            _sel_p = click.prompt("Select project", default=-1, type=int)
+            if _sel_p == -1: break
+            _p = projects[_sel_p]
+            while True:
+                click.echo(click.style(day.strftime("%A: %b %d"), bold=True))
+                _list_active_tasks(_p.tasks, day)
+                _sel_t = click.prompt("Select task", default=-1, type=int)
+                if _sel_t == -1: break
+                _t = _p.tasks[_sel_t].add_date(day)
+            io.save_project(_p)
+
+        #click.clear()
 
 if __name__ == "__main__":
     cli()
