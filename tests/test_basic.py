@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 from weekplan import Project, Task
 from weekplan import base
@@ -13,10 +13,18 @@ def test_task_name():
     assert t.name == name
 
 def test_task_add_date():
-    date = datetime(year=2020, month=2, day=7)
+    _date = date(year=2020, month=2, day=7)
     t = base.Task("name")
-    t.add_date(date)
-    assert date in t.dates
+    t.add_date(_date)
+    assert _date in t.dates
+
+def test_task_add_date_duplicate():
+    _date = date(year=2020, month=2, day=7)
+    _date_dup = date(year=2020, month=2, day=7)
+    t = base.Task("name")
+    t.add_date(_date)
+    t.add_date(_date_dup)
+    assert _date in t.dates and len(t.dates) == 1
 
 def test_project_class():
     p = base.Project("name")
