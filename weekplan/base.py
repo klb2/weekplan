@@ -1,6 +1,16 @@
+import os.path
 from datetime import date as DATE
 import dataclasses
 from dataclasses import dataclass
+import configparser
+
+
+BASE_DIR = os.path.expanduser("~/.weekplan")
+CONF_FILE = 'weekplan.ini'
+SECT_INI_PROJECTS = 'projects'
+
+TEMPLATE_FILE = "templates.ini"
+
 
 
 @dataclass
@@ -10,17 +20,18 @@ class Task:
     completed: bool = False
 
     def __post_init__(self):
-        _dates = []
+        _dates = set()
         for _date in self.dates:
             if not isinstance(_date, DATE) and not _date is None:
                 _date = DATE.fromisoformat(_date)
-            _dates.append(_date)
-        self.dates = _dates
+            _dates.add(_date)
+        self.dates = sorted(_dates)
 
     def add_date(self, date: (DATE, str)):
         if isinstance(date, str):
             date = DATE.fromisoformat(date)
-        self.dates.append(date)
+        if date not in self.dates:
+            self.dates.append(date)
         self.dates = sorted(self.dates)
 
 
@@ -43,3 +54,17 @@ class Project:
 
     def add_task(self, task: Task):
         self.tasks.append(task)
+
+
+def create_project_from_template(name, template: str, **kwargs) -> Project:
+    config = configparser.ConfigParser()
+    config.read(os.path.join(BASE_DIR, TEMPLATE_FILE))
+    template = template.lower()
+    tasks = config.get(template, "tasks")
+    tasks = tasks.strip()
+    tasks = tasks.split("\n")
+    p = Project(name, **kwargs)
+    for _task in tasks:
+        _t = Task(_task)
+        p.add_task(_t)
+    return p

@@ -6,12 +6,8 @@ import json
 import re
 import configparser
 
-from .base import Project
+from .base import Project, BASE_DIR, CONF_FILE, SECT_INI_PROJECTS
 
-BASE_DIR = os.path.expanduser("~/.weekplan")
-CONF_FILE = 'weekplan.ini'
-
-SECT_INI_PROJECTS = 'projects'
 
 def generate_ini_file() -> None:
     config = configparser.ConfigParser()
