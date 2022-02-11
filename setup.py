@@ -28,7 +28,7 @@ setup(
     tests_require=['pytest', 'tox'],
     entry_points={
         'console_scripts': [
-            'weekplan = weekplan.__main__:main_cmd'
+            'weekplan = weekplan.__main__:main_cli'
         ],
 },
 )
