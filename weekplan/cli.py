@@ -40,13 +40,16 @@ def add_project(name, description, template):
 def list_projects(verbose):
     projects = io.load_projects()
     for _project in projects:
-        click.echo(click.style(_project.name, bold=True))
+        click.secho(_project.name, bold=True)
         if verbose >= 1:
-            click.echo(click.style(_project.description, italic=True))
+            click.secho(_project.description, italic=True)
+            _task_style = {}
             for _task_idx, _task in enumerate(_project.tasks):
                 if verbose < 2:
                     if _task.completed: continue
-                click.echo(f"{_task_idx:02d}\t{_task.name}") 
+                else:
+                    _task_style = {"fg": "green"} if _task.completed else {"fg": "red"}
+                click.secho(f"{_task_idx:02d}\t{_task.name}", **_task_style) 
             click.echo("\n")
         click.echo('---')
     #click.echo(projects)
@@ -55,16 +58,17 @@ def _list_projects(projects):
     for idx, _p in enumerate(projects):
         click.echo(f"{idx:>2d}: {_p.name}")
 
-def _list_active_projects(projects):
+def _list_active_projects(projects, day=None):
     for idx, _p in enumerate(projects):
         if _p.completed is not None: continue
+        if day in _p.dates: continue
         click.echo(f"{idx:>2d}: {_p.name}")
 
 def _list_tasks(tasks):
     for idx, _t in enumerate(tasks):
         click.echo(f"{idx:>2d}: {_t.name}")
 
-def _list_active_tasks(tasks, day):
+def _list_active_tasks(tasks, day=None):
     for idx, _t in enumerate(tasks):
         if (day in _t.dates) or (_t.completed): continue
         click.echo(f"{idx:>2d}: {_t.name}")
@@ -86,6 +90,22 @@ def add_task(name):
     _selected_project.add_task(t)
     io.save_project(_selected_project)
 
+@task.command("complete")
+def complete_task():
+    projects = io.load_projects()
+    while True:
+        _list_active_projects(projects)
+        _sel_p = click.prompt("Select project", default=-1, type=int)
+        if _sel_p == -1: break
+        _p = projects[_sel_p]
+        while True:
+            _list_active_tasks(_p.tasks)
+            _sel_t = click.prompt("Select task", default=-1, type=int)
+            if _sel_t == -1: break
+            _p.tasks[_sel_t].completed = True
+        #click.echo()
+        io.save_project(_p)
+        click.clear()
 
 
 @cli.group("week", invoke_without_command=True)
@@ -105,11 +125,14 @@ def _show_week():
         (r'[A-Z][a-z]+ \([A-Z][a-z]+ [0-9]{2}\)', lambda text: click.style(text, bold=True)),
         ]
     for p in projects:
-        for _task in p.tasks:
-            #_days_in_week = sorted(set(_task.dates).intersection(week))
-            row = [_task.name if _day in _task.dates else "" for _day in week]
-            if not row == [""]*len(week):
-                table.append(row)
+        row = [p.name if _day in p.dates else "" for _day in week]
+        if not row == [""]*len(week):
+            table.append(row)
+        #for _task in p.tasks:
+        #    #_days_in_week = sorted(set(_task.dates).intersection(week))
+        #    row = [_task.name if _day in _task.dates else "" for _day in week]
+        #    if not row == [""]*len(week):
+        #        table.append(row)
     if not table:
         return
     table = columnar.columnar(data=table, headers=[_d.strftime("%a (%b %d)")
@@ -129,20 +152,21 @@ def plan_week():
     projects = io.load_projects()
     for day in week:
         while True:
-            click.echo(click.style(day.strftime("%A: %b %d"), bold=True))
+            click.secho(day.strftime("%A: %b %d"), bold=True)
             #_list_projects(projects)
-            _list_active_projects(projects)
+            _list_active_projects(projects, day)
             _sel_p = click.prompt("Select project", default=-1, type=int)
             if _sel_p == -1: break
             _p = projects[_sel_p]
+            _p.add_date(day)
             click.echo()
-            while True:
-                click.echo(click.style(day.strftime("%A: %b %d"), bold=True))
-                _list_active_tasks(_p.tasks, day)
-                _sel_t = click.prompt("Select task", default=-1, type=int)
-                if _sel_t == -1: break
-                _t = _p.tasks[_sel_t].add_date(day)
-            click.echo()
+            #while True:
+            #    click.echo(click.style(day.strftime("%A: %b %d"), bold=True))
+            #    _list_active_tasks(_p.tasks, day)
+            #    _sel_t = click.prompt("Select task", default=-1, type=int)
+            #    if _sel_t == -1: break
+            #    _t = _p.tasks[_sel_t].add_date(day)
+            #click.echo()
             io.save_project(_p)
         click.clear()
 
