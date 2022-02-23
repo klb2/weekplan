@@ -5,11 +5,13 @@ import columnar
 
 from . import Project, Task
 from . import io
+from . import __version__
 from .base import create_project_from_template
 
 
 @click.group(invoke_without_command=True)
 @click.pass_context
+@click.version_option(__version__)
 def cli(ctx):
     """Top level"""
     if ctx.invoked_subcommand is None:
@@ -37,10 +39,16 @@ def add_project(name, description, template):
 
 @project.command("list")
 @click.option('-v', '--verbose', count=True)
-def list_projects(verbose):
+@click.option("-a", "--show_all", is_flag=True, default=False)
+def list_projects(verbose, show_all):
     projects = io.load_projects()
     for _project in projects:
-        click.secho(_project.name, bold=True)
+        _project_style = {"bold": True}
+        if _project.completed is not None:
+            if not show_all: continue
+            _project_style["fg"] = "green"
+            #_project_style["strikethrough"] = True
+        click.secho(_project.name, **_project_style)
         if verbose >= 1:
             click.secho(_project.description, italic=True)
             _task_style = {}
@@ -74,6 +82,16 @@ def _list_active_tasks(tasks, day=None):
         click.echo(f"{idx:>2d}: {_t.name}")
 
 
+@project.command("complete")
+def complete_project():
+    projects = io.load_projects()
+    _list_active_projects(projects)
+    _sel_p = click.prompt("Select project", default=-1, type=int)
+    if _sel_p == -1: return
+    _p = projects[_sel_p]
+    _p.completed = date.today()
+    io.save_project(_p)
+
 
 @cli.group("task")
 def task():
@@ -103,7 +121,6 @@ def complete_task():
             _sel_t = click.prompt("Select task", default=-1, type=int)
             if _sel_t == -1: break
             _p.tasks[_sel_t].completed = True
-        #click.echo()
         io.save_project(_p)
         click.clear()
 
