@@ -35,6 +35,9 @@ weekplan task     # for listing/creating/editing tasks
 weekplan week     # for listing/planning the week
 ```
 
+All of the projects are stored in the `~/.weekplan/` directory.
+
+
 ### Projects
 For working with projects, the following commands are available.
 
@@ -86,4 +89,27 @@ If you want to continue to the following day, simply hit Return without a
 number (or explicitly type `-1`).
 ```bash
 weekplan week plan
+```
+
+### Templates
+If you want to use templates for a simplified project creation, you need to
+create a file `~/.weekplan/templates.ini`, which follows the format
+```ini
+[name]
+tasks =
+	First Task
+	Second Task
+	Name of the third task
+
+[othertemplate]
+tasks =
+	This is the first task
+	Second task for projects with this template
+```
+
+Each section defines a new template and the key `tasks` gives the list of tasks
+that are created and assigned to the new project.
+To create a project with template `othertemplate`, you can run
+```bash
+weekplan project add -t othertemplate "Name of the project"
 ```
