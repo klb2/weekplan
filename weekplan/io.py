@@ -7,7 +7,8 @@ import re
 import configparser
 
 from .base import Project, BASE_DIR, CONF_FILE, SECT_INI_PROJECTS
-
+    
+os.makedirs(BASE_DIR, exist_ok=True)
 
 def generate_ini_file() -> None:
     config = configparser.ConfigParser()
