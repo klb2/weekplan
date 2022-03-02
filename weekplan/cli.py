@@ -132,9 +132,10 @@ def week(ctx):
         table = _show_week()
         click.echo(table)
 
-def _show_week():
+def _show_week(week: int | None=None, day: int | None=None):
     today = date.today()
-    week = today.isocalendar().week
+    if week is None:
+        week = today.isocalendar().week
     week = [date.fromisocalendar(today.year, week, i+1) for i in range(5)]
     projects = io.load_projects()
     table = []
@@ -152,9 +153,11 @@ def _show_week():
         #        table.append(row)
     if not table:
         return
-    table = columnar.columnar(data=table, headers=[_d.strftime("%a (%b %d)")
-                                                   for _d in week],
-                              justify='c', patterns=patterns)
+    headers = [_d.strftime("%a (%b %d)") for _d in week]
+    if day is not None:
+        headers[day] = click.style(headers[day], reverse=True, bold=True)
+    table = columnar.columnar(data=table, headers=headers, justify='c',
+                              patterns=patterns)
     return table
 
 @week.command("show")
@@ -162,13 +165,21 @@ def show_week():
     click.echo(_show_week())
 
 @week.command("plan")
-def plan_week():
+@click.option("-w", "--week", type=int, default=None)
+@click.option("-n", "--next_week", is_flag=True, default=False)
+def plan_week(week, next_week):
     today = date.today()
-    week = today.isocalendar().week
+    if week is None:
+        week = today.isocalendar().week
+        if next_week:
+            week = week + 1
+    week_number = week
     week = [date.fromisocalendar(today.year, week, i+1) for i in range(5)]
     projects = io.load_projects()
-    for day in week:
+    for idx_day, day in enumerate(week):
         while True:
+            click.clear()
+            click.echo(_show_week(week_number, idx_day))
             click.secho(day.strftime("%A: %b %d"), bold=True)
             #_list_projects(projects)
             _list_active_projects(projects, day)
@@ -185,7 +196,7 @@ def plan_week():
             #    _t = _p.tasks[_sel_t].add_date(day)
             #click.echo()
             io.save_project(_p)
-        click.clear()
+            #click.clear()
 
 if __name__ == "__main__":
     cli()
