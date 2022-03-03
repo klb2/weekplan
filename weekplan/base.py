@@ -66,6 +66,13 @@ class Project:
             self.dates.append(date)
         self.dates = sorted(self.dates)
 
+    def remove_date(self, date: (DATE, str)):
+        if isinstance(date, str):
+            date = DATE.fromisoformat(date)
+        if date in self.dates:
+            self.dates.remove(date)
+        self.dates = sorted(self.dates)
+
 
 def create_project_from_template(name, template: str, **kwargs) -> Project:
     config = configparser.ConfigParser()

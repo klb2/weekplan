@@ -72,6 +72,11 @@ def _list_active_projects(projects, day=None):
         if day in _p.dates: continue
         click.echo(f"{idx:>2d}: {_p.name}")
 
+def _list_scheduled_projects(projects, day):
+    for idx, _p in enumerate(projects):
+        if day in _p.dates:
+            click.echo(f"{idx:>2d}: {_p.name}")
+
 def _list_tasks(tasks):
     for idx, _t in enumerate(tasks):
         click.echo(f"{idx:>2d}: {_t.name}")
@@ -167,7 +172,8 @@ def show_week():
 @week.command("plan")
 @click.option("-w", "--week", type=int, default=None)
 @click.option("-n", "--next_week", is_flag=True, default=False)
-def plan_week(week, next_week):
+@click.option("-r", "--remove", is_flag=True, default=False)
+def plan_week(week, next_week, remove):
     today = date.today()
     if week is None:
         week = today.isocalendar().week
@@ -182,11 +188,18 @@ def plan_week(week, next_week):
             click.echo(_show_week(week_number, idx_day))
             click.secho(day.strftime("%A: %b %d"), bold=True)
             #_list_projects(projects)
-            _list_active_projects(projects, day)
+            if remove:
+                click.secho("Warning: Removing projects!", fg='red', bold=True)
+                _list_scheduled_projects(projects, day)
+            else:
+                _list_active_projects(projects, day)
             _sel_p = click.prompt("Select project", default=-1, type=int)
             if _sel_p == -1: break
             _p = projects[_sel_p]
-            _p.add_date(day)
+            if remove:
+                _p.remove_date(day)
+            else:
+                _p.add_date(day)
             click.echo()
             #while True:
             #    click.echo(click.style(day.strftime("%A: %b %d"), bold=True))
