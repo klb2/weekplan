@@ -1,0 +1,19 @@
+# Changelog
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+
+
+## [0.2.0] - 2022-XX-XX
+### Added
+- Categories added to projects and templates
+
+## [0.1.0] - 2022-03-22
+### Added
+- Basic functionality of creating projects, tasks and planning a week
+- JSON input/output of projects
+- Create projects from templates
+- Task assignment to projects
+- CLI to add and list projects and tasks
+- CLI to show and plan week

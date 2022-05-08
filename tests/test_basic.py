@@ -40,3 +40,17 @@ def test_project_add_task():
     t = base.Task("task_name")
     p.add_task(t)
     assert t in p.tasks
+
+def test_project_add_category():
+    p = base.Project("project_name")
+    c = "category"
+    p.add_category(c)
+    assert c in p.categories
+
+def test_project_add_categories():
+    p = base.Project("project_name")
+    c1 = "category"
+    p.add_category(c1)
+    c2 = "cat2"
+    p.add_category(c2)
+    assert p.categories == set([c2, c1])

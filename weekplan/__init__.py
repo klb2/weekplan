@@ -1,6 +1,6 @@
 __author__ = "Karl Besser"
 __email__ = "k.besser@tu-bs.de"
-__version__ = "0.1"
+__version__ = "0.2"
 
 from .base import Project, Task
 

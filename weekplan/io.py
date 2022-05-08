@@ -22,9 +22,11 @@ def generate_ini_file() -> None:
     with open(os.path.join(BASE_DIR, CONF_FILE), 'w') as _conf_file:
         config.write(_conf_file)
 
-def _json_serial_datetime(obj):
+def _json_serial_default(obj):
     if isinstance(obj, (datetime, date)):
         return obj.isoformat()
+    elif isinstance(obj, set):
+        return list(obj)
     raise TypeError ("Type %s not serializable" % type(obj))
 
 def sanitize_name(name: str) -> str:
@@ -50,7 +52,7 @@ def save_project(project: Project):
     _filename = "{}.json".format(sanitize_name(project.name))
     target_file = os.path.join(BASE_DIR, _filename)
     with open(target_file, 'w') as out_file:
-        json.dump(_asdict, out_file, default=_json_serial_datetime,
+        json.dump(_asdict, out_file, default=_json_serial_default,
                   indent=4)
     return _asdict
 
