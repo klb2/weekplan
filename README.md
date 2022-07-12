@@ -101,10 +101,17 @@ tasks =
 	Second Task
 	Name of the third task
 
+categories =
+	Category
+
 [othertemplate]
 tasks =
 	This is the first task
 	Second task for projects with this template
+
+categories =
+	Category 1
+	Category 2
 ```
 
 Each section defines a new template and the key `tasks` gives the list of tasks
